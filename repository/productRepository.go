@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"go-api/model"
+	"log"
 )
 
 type ProductRepository struct {
@@ -88,4 +89,53 @@ func (pr *ProductRepository) GetProductById(idProduct int) (*model.Product, erro
 
 	query.Close()
 	return &produto, nil
+}
+
+func (pr *ProductRepository) UpdateProduct(product model.Product) (*model.Product, error) {
+	log.Println("Recebido no repository:", product)
+
+	query, err := pr.connection.Prepare("UPDATE product SET productName = $2, price = $3 WHERE id = $1")
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := query.Exec(product.ID, product.Name, product.Price)
+	if err != nil {
+		return nil, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+	if rowsAffected == 0 {
+		return nil, fmt.Errorf("Nenhuma linha foi atualizada, verifique se o produto com id %d não exista", product.ID)
+	}
+	query.Close()
+	return &product, nil
+}
+
+func (pr *ProductRepository) DeleteProduct(idProduct int) error {
+	log.Println("Recebido no repository idProduct:", idProduct)
+
+	query, err := pr.connection.Prepare("DELETE FROM product WHERE id = $1")
+	if err != nil {
+		return err
+	}
+
+	result, err := query.Exec(idProduct)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("produto com ID %d não encontrado", idProduct)
+	}
+
+	query.Close()
+	return nil
 }

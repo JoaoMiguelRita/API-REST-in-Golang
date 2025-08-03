@@ -3,6 +3,7 @@ package service
 import (
 	"go-api/model"
 	"go-api/repository"
+	"log"
 )
 
 type ProductService struct {
@@ -37,4 +38,24 @@ func (ps *ProductService) GetProductById(idProdut int) (*model.Product, error) {
 	}
 
 	return product, nil
+}
+
+func (ps *ProductService) UpdateProduct(product model.Product) (*model.Product, error) {
+	log.Println("Recebido na service:", product)
+
+	updatedProduct, err := ps.repository.UpdateProduct(product)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedProduct, nil
+}
+
+func (ps *ProductService) DeleteProduct(idProdut int) error {
+	err := ps.repository.DeleteProduct(idProdut)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
